@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#343a40" />
+  <title>Angle Health Broker Portal - Plan Year Outlook (concept)</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 550 650'%3E%3Cpath fill='%236d39d9' d='M190.209 461.213H385.629L430.618 573.621H554.339L469.18 353.693H230.586L190.209 461.213Z M288.881 198.459L339.033 332.515H461.146L346.828 44.1536L288.881 198.459Z M334.791 13.7914L334.212 12.3323H220.132L0.00634766 573.621H123.727L277.172 167.161L277.184 167.192L334.791 13.7914Z'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header class="topnav">
+    <div class="brand">
+      <svg width="28" height="33" viewBox="0 0 550 650" fill="none" aria-hidden="true">
+        <path fill="#fff" fill-rule="evenodd" d="M190.209 461.213H385.629L430.618 573.621H554.339L469.18 353.693H230.586L190.209 461.213Z" />
+        <path fill="#fff" fill-rule="evenodd" d="M288.881 198.459L339.033 332.515H461.146L346.828 44.1536L288.881 198.459Z" />
+        <path fill="#fff" fill-rule="evenodd" d="M334.791 13.7914L334.212 12.3323H220.132L0.00634766 573.621H123.727L277.172 167.161L277.184 167.192L334.791 13.7914Z" />
+      </svg>
+      <span>Business</span>
+    </div>
+    <nav class="nav-items">
+      <div class="nav-item" data-nav="summary">Summary</div>
+      <div class="nav-item" data-nav="employees">Employees</div>
+      <div class="nav-item" data-nav="billing">Billing</div>
+      <div class="nav-item" data-nav="documents">Documents</div>
+      <div class="nav-item active" data-nav="reporting">Reporting</div>
+    </nav>
+    <button class="btn btn-primary" id="group-list">Back To Group List</button>
+  </header>
+
+  <section class="page-head">
+    <div class="crumbs"><a href="#">Home</a><span class="sep">/</span><a href="#" id="crumb-rep">Reporting</a><span id="crumb-mid"><span class="sep">/</span><span id="crumb-last">Plan Year Outlook</span></span></div>
+    <div class="container"><h1 id="h1">Plan Year Outlook</h1></div>
+  </section>
+
+  <main>
+    <!-- ================= report view: the new feature ================= -->
+    <div class="container view" id="view-report">
+      <a href="#" class="btn btn-link back" id="back"><svg width="9" height="14" viewBox="0 0 9 14"><path d="M7.5 1.5 2 7l5.5 5.5" fill="none" stroke="#6d39d9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Back</a>
+      <div class="report-bar">
+        <div>
+          <div class="report-title"><h2 id="rpt-title">Plan Year Outlook (LF)</h2><span class="badge badge-info">NEW</span></div>
+          <div class="created" id="created"></div>
+        </div>
+        <button class="btn btn-primary" id="download">Download</button>
+      </div>
+      <p class="desc">Where this plan year's claims fund is likely to land at settlement: claims incurred but not yet received, the remaining months projected from this group's experience blended with its underwriting, and each member's specific stop-loss deductible. Ranges and probabilities are calibrated on completed Angle group-years.</p>
+
+      <div class="controls">
+        <div><label class="lbl">Group</label><div class="select"><select id="group"></select></div></div>
+        <div><label class="lbl">Period</label><div class="select"><select id="period"></select></div></div>
+        <div class="asof">
+          <div class="row"><span>Outlook as of: <b id="asof-label"></b></span><span id="asof-month"></span></div>
+          <input type="range" id="asof" min="2" max="10" step="1" value="10" aria-label="Outlook as of month" />
+          <div class="ticks"><span id="tick-lo"></span><span>Drag to see what the outlook said earlier in the year</span><span id="tick-hi"></span></div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="card stat"><div class="card-body"><h6>Chance of a claims fund surplus</h6><div class="val" id="k-prob"></div><div class="meter"><i id="k-prob-bar"></i></div><div class="foot" id="k-prob-foot"></div></div></div>
+        <div class="card stat"><div class="card-body"><h6>Expected surplus at settlement</h6><div class="val green" id="k-surplus"></div><div class="foot" id="k-surplus-foot"></div></div></div>
+        <div class="card stat"><div class="card-body"><h6>Projected plan-year claims</h6><div class="val" id="k-proj"></div><div class="foot" id="k-proj-foot"></div></div></div>
+        <div class="card stat"><div class="card-body"><h6>Claims not yet received</h6><div class="val" id="k-ibnr"></div><div class="foot" id="k-ibnr-foot"></div></div></div>
+      </div>
+
+      <div class="card callout">
+        <div class="icon"><svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.6" fill="none" stroke="#6d39d9" stroke-width="1.5"/><path d="M8 7.2v4" stroke="#6d39d9" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="4.9" r="1" fill="#6d39d9"/></svg></div>
+        <div><div class="t" id="callout-t"></div><div class="d" id="callout-d"></div></div>
+      </div>
+
+      <div class="grid2">
+        <div class="card"><div class="card-body">
+          <h6>Claims by incurred month</h6>
+          <div class="sub">Paid claims, the estimate still to arrive for each month, and projected months, against the monthly claims fund allocation.</div>
+          <div class="chart-wrap"><canvas id="c-monthly"></canvas></div>
+          <div class="legend"><span><i style="background:#6d39d9"></i>Paid</span><span><i style="background:#cdb8f4"></i>Not yet received (est.)</span><span><i style="background:#e6dbfa"></i>Projected</span><span><i class="line"></i>Claims fund allocation</span></div>
+        </div></div>
+        <div class="card"><div class="card-body">
+          <h6>Where the plan year lands</h6>
+          <div class="sub" id="dist-sub"></div>
+          <div class="chart-wrap"><canvas id="c-dist"></canvas></div>
+          <div class="legend"><span><i style="background:#6d39d9"></i>Surplus</span><span><i style="background:#c9ccd3"></i>Shortfall (aggregate stop-loss pays)</span><span><i style="background:rgba(109,57,217,.12)"></i>Calibrated 80% range</span></div>
+        </div></div>
+      </div>
+
+      <div class="grid2b">
+        <div class="card"><div class="card-body">
+          <h6>How the outlook adds up</h6>
+          <div class="sub">Claims that count against the 12-month claims fund, built up to the projected total at settlement.</div>
+          <div class="wf" id="wf"></div>
+          <div class="notes" id="wf-note" style="margin-top:10px"></div>
+        </div></div>
+        <div class="card"><div class="card-body">
+          <h6>Large claimants</h6>
+          <div class="sub" id="large-count"></div>
+          <table class="rt" style="margin-top:12px">
+            <thead><tr><th>Risk identifier</th><th class="num">Paid to date</th><th class="num">Counted to fund</th><th class="num">To deductible</th><th>Status</th></tr></thead>
+            <tbody id="large-body"></tbody>
+          </table>
+          <div class="notes" id="large-note" style="margin-top:10px"></div>
+        </div></div>
+      </div>
+
+      <div class="section-title">Monthly detail</div>
+      <table class="rt">
+        <thead><tr><th>Incurred month</th><th class="num">Paid to date</th><th>Received</th><th class="num">Not yet received</th><th class="num">Projected</th><th class="num">Total claims</th><th class="num">Benefit expense allocation</th><th class="num">Under / (over) fund</th></tr></thead>
+        <tbody id="tbl-body"></tbody>
+      </table>
+
+      <div class="grid2b" style="margin-top:24px">
+        <div class="card"><div class="card-body">
+          <h6>How this outlook is calibrated</h6>
+          <div class="sub">Every figure on this page is recomputed from this group's claims when you move the slider.</div>
+          <div style="margin-top:10px">
+            <div class="kv"><div class="k">Weight on this group's own claims<small id="m-z-sub"></small></div><div class="v" id="m-z"></div></div>
+            <div class="kv"><div class="k">Claims level vs. underwriting<small id="m-r-sub"></small></div><div class="v" id="m-r"></div></div>
+            <div class="kv"><div class="k">Share of a month's claims received after 1 / 2 / 4 months<small id="m-dev-sub"></small></div><div class="v" id="m-dev"></div></div>
+            <div class="kv"><div class="k">Simulation percentiles reported as the 80% range<small id="m-cal-sub"></small></div><div class="v" id="m-cal"></div></div>
+            <div class="kv" style="border-bottom:0"><div class="k">80% range coverage, before → after calibration<small id="m-cov-sub"></small></div><div class="v" id="m-cov"></div></div>
+          </div>
+        </div></div>
+        <div class="card"><div class="card-body">
+          <h6>Held-out coverage by month of the plan year</h6>
+          <div class="sub">Share of completed group-years whose settled claims fell inside the range. M = plan month, R = run-out month.</div>
+          <div class="chart-wrap" style="height:200px"><canvas id="c-cov"></canvas></div>
+          <div class="legend"><span><i style="background:#c9ccd3"></i>Simulation 10th-90th percentile</span><span><i style="background:#6d39d9"></i>Calibrated 80% range</span></div>
+          <div class="notes" id="m-pooled" style="margin-top:8px"></div>
+        </div></div>
+      </div>
+
+      <div class="notes">
+        * Prior months' data may continue to update as more claims are received.<br />
+        ** Recent months' claims may increase as more claims are received; the outlook estimates that amount instead of treating it as savings.<br />
+        *** Assumes a 12/24 contract with a $30,000 specific deductible and aggregate stop-loss attaching at 100% of the claims fund. Actual surplus refunds follow the group's contract and final settlement.
+      </div>
+    </div>
+
+    <!-- ================= report chooser: where it ships ================= -->
+    <div class="container view" id="view-chooser">
+      <div class="chooser-top">
+        <div class="period"><label class="lbl">Period</label><div class="select"><select id="chooser-period"></select></div></div>
+        <button class="btn btn-primary" id="dl-all" style="padding:.6rem 1.1rem">Download All For This Period</button>
+      </div>
+      <p class="select-report-lbl">Select Report</p>
+      <div class="report-grid">
+        <div class="rcard" data-r="funding"><div class="rhead"><div class="rtitle">Funding Summary (LF)</div><div class="radio"></div></div>
+          <div class="rdesc">Group experience report including membership, medical and pharmacy claims, and premiums. Claims are grouped by incurred month, and summaries are available 45 days after month end.</div>
+          <div class="rnote">We have made some recent changes to make our reporting clearer. Should you need any of the prior reporting, please reach out to Account Management.</div></div>
+        <div class="rcard" data-r="large"><div class="rhead"><div class="rtitle">Large Claimants</div><div class="radio"></div></div><div class="rdesc">Group members exceeding $10k in claims.</div></div>
+        <div class="rcard" data-r="topcost"><div class="rhead"><div class="rtitle">Top 20 Medications by Plan Cost</div><div class="radio"></div></div><div class="rdesc">Top 20 medications by cost for the group during the plan period.</div></div>
+        <div class="rcard compact" data-r="topcount"><div class="rhead"><div class="rtitle">Top 20 Medications by Number of Prescriptions</div><div class="radio"></div></div><div class="rdesc">Top 20 medications by prescription count for the group during the plan period.</div></div>
+        <div class="rcard compact sel" data-r="outlook"><div class="rhead"><div class="rtitle">Plan Year Outlook (LF) <span class="badge badge-info" style="margin-left:4px">NEW</span></div><div class="radio"></div></div><div class="rdesc">Where the claims fund is likely to land at settlement: claims not yet received, remaining months and specific stop-loss, with calibrated ranges.</div></div>
+      </div>
+      <button class="btn btn-primary" id="view-btn">View Report</button>
+    </div>
+  </main>
+
+  <div class="container"><div class="foot-demo">Unofficial concept demo by Mohith Gajjela. Not affiliated with Angle Health. Synthetic data.</div></div>
+  <div class="toast" id="toast"></div>
+
+  <script src="dist/outlook.bundle.js"></script>
+  <script src="data/model.js"></script>
+  <script src="data/groups.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
